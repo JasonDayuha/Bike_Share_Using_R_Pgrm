@@ -14,9 +14,11 @@ output:
 ---
 
 ```{r setup, warning= FALSE , include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE)
 
 ```
+
+
 
 # 1. Introduction
 
@@ -51,10 +53,15 @@ The last 12 months of data ( November 2021 - October 2022 ) will be analyzed for
 
 Please refer to the Appendix regarding the R programing code used to accomplish the following tasks:
 
+
 4.1 Download the Libraries used to work with this data.
-```{r Library, warning=FALSE,eval=FALSE}
+```{r Library, warning=FALSE, include=FALSE}
+
+
+
 # Library used:
 library("tidyverse")
+library("dplyr")
 library("janitor")
 library("skimr")
 library("lubridate")
@@ -64,6 +71,8 @@ library("viridis")
 library("leaflet")
 library("htmlwidgets")
 library("htmltools")
+library("kableExtra")
+library("knitr")
 
 
 ```
@@ -71,7 +80,8 @@ library("htmltools")
 
 4.2 Download the raw data [ Data set](https://divvy-tripdata.s3.amazonaws.com/index.html) and combine into one table.
 
-```{R get_data, warning = FALSE, message = FALSE,eval= FALSE}
+```{R get_data, warning = FALSE, message = FALSE,eval=TRUE, include=FALSE }
+options(timeout=300)   #used to prevent time out if i takes too long 
 # 4.2 download Raw data
 url <- "https://divvy-tripdata.s3.amazonaws.com/202111-divvy-tripdata.zip"
 download.file(url, "temp_data.zip") 
@@ -82,56 +92,59 @@ month2_url <- "https://divvy-tripdata.s3.amazonaws.com/202112-divvy-tripdata.zip
 download.file(month2_url, "temp_data.zip") 
 unzip("temp_data.zip")
 df2 <- read.csv("202112-divvy-tripdata.csv")
-  
-month3_url <- "https://divvy-tripdata.s3.amazonaws.com/202201-divvy-tripdata.zip.zip"
+
+month3_url <- "https://divvy-tripdata.s3.amazonaws.com/202201-divvy-tripdata.zip"
 download.file(month3_url, "temp_data.zip") 
 unzip("temp_data.zip")
 df3 <- read.csv("202201-divvy-tripdata.csv")
-
-month4_url <- "https://divvy-tripdata.s3.amazonaws.com/202202-divvy-tripdata.zip.zip"
+    
+month4_url <- "https://divvy-tripdata.s3.amazonaws.com/202202-divvy-tripdata.zip"
 download.file(month4_url, "temp_data.zip") 
 unzip("temp_data.zip")
 df4 <- read.csv("202202-divvy-tripdata.csv")
-
+    
 month5_url <- "https://divvy-tripdata.s3.amazonaws.com/202203-divvy-tripdata.zip"
 download.file(month5_url, "temp_data.zip") 
 unzip("temp_data.zip")
 df5 <- read.csv("202203-divvy-tripdata.csv")
-
+    
 month6_url <- "https://divvy-tripdata.s3.amazonaws.com/202204-divvy-tripdata.zip"
 download.file(month6_url, "temp_data.zip") 
 unzip("temp_data.zip")
 df6 <- read.csv("202204-divvy-tripdata.csv")
-
+    
 month7_url <- "https://divvy-tripdata.s3.amazonaws.com/202205-divvy-tripdata.zip"
 download.file(month7_url, "temp_data.zip") 
 unzip("temp_data.zip")
 df7 <- read.csv("202205-divvy-tripdata.csv")
-
+    
 month8_url <- "https://divvy-tripdata.s3.amazonaws.com/202206-divvy-tripdata.zip"
 download.file(month8_url, "temp_data.zip") 
 unzip("temp_data.zip")
 df8<- read.csv("202206-divvy-tripdata.csv")
-  
+    
 month9_url <- "https://divvy-tripdata.s3.amazonaws.com/202207-divvy-tripdata.zip"
 download.file(month9_url, "temp_data.zip") 
 unzip("temp_data.zip")
 df9 <- read.csv("202207-divvy-tripdata.csv")
-
+    
 month10_url <- "https://divvy-tripdata.s3.amazonaws.com/202208-divvy-tripdata.zip"
 download.file(month10_url, "temp_data.zip")
 unzip("temp_data.zip")
 df10 <- read.csv("202208-divvy-tripdata.csv")
-  
+    
+# Note that the file name for this folder is different from the rest of the data being downloaded
 month11_url <- "https://divvy-tripdata.s3.amazonaws.com/202209-divvy-tripdata.zip"
 download.file(month11_url, "temp_data.zip") 
 unzip("temp_data.zip")
-df11 <- read.csv("202209-divvy-tripdata.csv")
-
+df11 <- read.csv("202209-divvy-publictripdata.csv")
+    
 month12_url <- "https://divvy-tripdata.s3.amazonaws.com/202210-divvy-tripdata.zip"
 download.file(month12_url, "temp_data.zip") 
 unzip("temp_data.zip")
 df12 <- read.csv("202210-divvy-tripdata.csv")
+    
+  
 
 #We start working with the data by first combining the last 12 months of data into one file. Then check the data for a quick overview of whats in the data frame.
 
@@ -139,36 +152,45 @@ df12 <- read.csv("202210-divvy-tripdata.csv")
 # Combine all 12 data file into one data set
 bike_rides <- rbind(df1,df2,df3,df4,df5,df6,df7,df8,df9,df10,df11,df12)
 
+
+# Remove individual data frames to free up memory
+rm(df1,df2,df3,df4,df5,df6,df7,df8,df9,df10,df11,df12)
+gc()  # Optional: calls garbage collector to free up memory
+
 # produce an overview of the data
 str(bike_rides)
 
 skim_without_charts(bike_rides)
 
-glimpse(bike_rides)
+(bike_rides)
 
 ```
 ### Cleaning Data
 
 4.3 Clean up column names for proper formatting 
 
-```{r clean_column, eval=FALSE}
+```{r clean_column, eval=TRUE,include=FALSE}
+
+# Replace with the correct file path and loading method
+#bike_rides <- read_csv("E:/Data Analysis2/Tutor- Bike Share/R- Bike Share/bike_rides.csv")
 
 # 4.3 make all column names text with proper formatting
 clean_names(bike_rides)
 
 
 # check if columns with dates are formatted as dates
-sapply(bike_rides, is.po) 
+sapply(bike_rides, is.POSIXct)
 
+# Convert 'started_at' and 'ended_at' to POSIXct
+bike_rides$started_at <- as.POSIXct(bike_rides$started_at, format = "%Y-%m-%d %H:%M:%S")
+bike_rides$ended_at <- as.POSIXct(bike_rides$ended_at, format = "%Y-%m-%d %H:%M:%S")
 
-# results shows that all columns formatted as dates are true 
 
 ```
 
 4.4 To aide in future analysis create new columns for year, month , day , week ,  y/m/d , and  h:m:s by adding extra columns to the data set. The codes used were created with the help of Isabel Peels project as [referance](https://isabellapeel.github.io/Cyclistic_Case_Study-Divvy_Bikes/Analysis_w_code.html#statistic-summary) .
 
-```{r new_columns,eval=FALSE}
-
+```{r new_columns, eval=TRUE,include=FALSE}
 
 # 4.4 Create column data for year, month , day , week ,  y/m/d , & h:m:s  . 
 bike_rides$year <- format(
@@ -216,7 +238,7 @@ bike_rides$ToD <- format(
 ```
 4.5 Check to make sure all numbers are formatted correctly.
 
-```{r number_format_check, eval=FALSE}
+```{r number_format_check, eval=TRUE,include=FALSE}
 # 4.5 the following checks all columns if numeric:
 sapply(bike_rides ,is.numeric)
 
@@ -226,7 +248,7 @@ bike_rides <- bike_rides %>%
 ```
 
 4.6 Find the ride length and create a new column in the data set. Delete any rows with ride_length less than zero because anything else does not make sense. 
-```{r ride_length,eval=FALSE}
+```{r ride_length, eval=TRUE,include=FALSE}
 
 # 4.6 Find the ride length and create a new column in the data frame.Delete any rows with ride_length less then zero because anything else does not make sense. 
 bike_rides$ride_length <- difftime(
@@ -234,6 +256,8 @@ bike_rides$ride_length <- difftime(
   bike_rides$started_at,
   units = "secs"
 ) 
+
+
 
 glimpse(bike_rides)
 # By checking the data with glimpse, it looks like the ride length is time base, change to numeric for ease of analysis
@@ -245,14 +269,19 @@ bike_rides$ride_length <- as.numeric(
 bike_rides_cleaned <- bike_rides %>%
   filter(!(ride_length < 0))
 
-check1 <- bike_rides_cleaned %>%
-  arrange(ride_length)
+# create new column for ride length in minutes
+bike_rides_cleaned$ride_length_min <- bike_rides_cleaned$ride_length / 60
+
+  
+# create new column for ride length in minutes
+bike_rides_cleaned$ride_length_hrs <- bike_rides_cleaned$ride_length / 3600
+ 
 ```
 
 
 
 4.7 Delete any rows with NA and "test" data.
-```{r NA_test_deletetion, eval=FALSE}
+```{r NA_test_deletetion, eval=TRUE,include=FALSE}
 
 # 4.7 Delete any rows with NA 
 bike_rides_cleaned <- na.omit(bike_rides_cleaned)
@@ -287,33 +316,31 @@ bike_rides_cleaned <- bike_rides_cleaned %>%
 # 5. Analyses
 
 
-```{r stat_summery, eval=FALSE, include=TRUE}
+```{r stat_summery, eval=TRUE,}
+summery1 <- bike_rides_cleaned %>%
+  group_by(member_casual) %>%
+  summarise(
+    total_trips=n(),
+    ave_ride_length_mins = (mean(ride_length, na.rm = TRUE))/60,
+    Total_bike_ride_length_hr=sum(ride_length)/3600,
+    electric_bike_ride_length_hr=sum(ride_length[rideable_type=="electric_bike"])/3600,
+    dock_bike_ride_length_hr=sum(ride_length[rideable_type=="docked_bike"])/3600, 
+    classic_bike_ride_length_hr=sum(ride_length[rideable_type=="classic_bike"])/3600, 
+  )
 
-# Statistical Summery
+# summarize cars data set
+  kable(summery1) %>%
+  kableExtra::kable_classic()
 
-SELECT 
-    member_casual,
-    COUNT(*) as total_trips,
-    AVG(ride_length_min) as avg_ride_length_mins,
-    SUM(ride_length_min) / 60 as total_bike_ride_length_hr,
-    SUM(CASE WHEN rideable_type = 'electric_bike' THEN ride_length_min ELSE 0 END) / 60 as total_electric_bike_ride_length_hr,
-    SUM(CASE WHEN rideable_type = 'docked_bike' THEN ride_length_min ELSE 0 END) / 60 as total_docked_bike_ride_length_hr,
-    SUM(CASE WHEN rideable_type = 'classic_bike' THEN ride_length_min ELSE 0 END) / 60 as total_classic_bike_ride_length_hr
-FROM bike_ride_clean
-WHERE start_station_name IS NOT NULL AND end_station_name IS NOT NULL -- Exclude rows with null values
-GROUP BY member_casual;
 ```
 
 
-
-<img src="https://imgur.com/kp5wN74.png" width= "1000px">
-
-Based on the statistical summery, members totaled 2,465,636 rides compared to casual with 1,652,826 total rides in the last 12 months from November 2021 to October 2022. In contrast, casual riders have a longer ride lengths than member riders.
+Based on the statistical summery, members totaled 3,401,913 rides compared to casual with 2,347,820 total rides in the last 12 months from November 2021 to October 2022. In contrast, casual riders have a longer ride lengths than member riders.
 
 Cyclistic bike use is popular during the summer months and decreases during fall and winter months for both casual and annual members. Casual members use Cyclistic bikes predominantly during the summer months, peaking during the last week of May from 11:00:00 to 16:00:00. Compared to casual riders, member riders has a relatively steady amount of rider usage throughout the summer months from May through August.
 
 5.1 Heat Map
-```{r heatmap, eval=FALSE, include=TRUE}
+```{r heatmap, eval=TRUE, include=TRUE, fig.width=8, fig.height= 12}
 #5.1 Heat Map
 # Create data frame that summarize the number of trips by date to 
    #find when is the most popular time bike share is used
@@ -525,17 +552,20 @@ hhp2a <- ggarrange(
   common.legend = TRUE, 
   legend = "right"
 )
+
+print(hhp2a)
+
+# Remove intermediate data frames and variables
+rm(heat_map_data1, heat_map_data2)
+gc()
 ```
 
-<!-- Rplot_Time to Ride-->
-<img src="https://i.imgur.com/T0fD7KK.png" width= "1000px ">
 
-
-Annual members tend to be most active during the beginning of the week, peaking on Wednesday totaling at 388,275 trips. Inversely casual riders are most active on Saturday at 350,037 rides.
+Annual members tend to be most active during the beginning of the week, peaking on Wednesday totaling at 529,557 trips. Inversely casual riders are most active on Saturday at 484,165 rides.
 
 
 5.2 Bar Graph
-```{r weekdays ,eval=FALSE, include=TRUE}
+```{r weekdays ,eval=TRUE, include=TRUE}
 #5.2 Bar Graph
 #Finding the most popular day of the week to ride in the last 12 months.
 week_day1 <- bike_rides_cleaned %>%
@@ -650,16 +680,66 @@ Weekday2 <- ggarrange(    #code to combine both graph
   common.legend = FALSE
   #legend = "right"
 )
-```
-<!-- Rplot day of week bike rides-->
-<img src="https://i.imgur.com/dwCYmy3.png" width="800px">
 
-Member riders use Cyclistic bike more than casual riders. Inversely casual rider's ride length is higher then member riders. This may be due to causal riders using Cyclistic bike for leisurely activity for longer period of time compared to members using the service for short commutes or running errands. Ride length is longer for the classic bike followed by electric and docked bikes with casual riders . Members riders do not use dock bikes at all and prefer classic bike or electric bikes.
+print(Weekday2)
+```
+
+Member riders use Cyclistic bike more than casual riders as shown on the bar graph above. Inversely casual riders' ride length is higher then member riders as shown in the chart below. This may be due to causal riders using Cyclistic bike for leisurely activity for longer period of time compared to members using the service for short commutes or running errands. Ride length is longer for the classic bike followed by electric and docked bikes with casual riders . Member riders do not use dock bikes at all and prefer classic bike or electric bikes.
 
 5.3 Bar Graph Ride Length
-```{r Ride_length, eval=FALSE, include=TRUE}
+```{r Ride_length, eval=TRUE, include=TRUE}
 
 #5.3 Bar Graph Ride Length
+
+# Bar graph for Casual riders
+
+
+#create data frame for casual using classic bikes
+bar1<- bike_rides_cleaned %>%
+  select(month,year, member_casual,ride_length_hrs,rideable_type) %>%
+  filter(member_casual=="casual") %>%
+  filter(rideable_type == "classic_bike") %>%
+  group_by(month,year)%>%
+  summarise(classic_bike=sum(ride_length_hrs),.groups = 'drop')
+
+#create data frame for casual using classic bikes
+bar2 <- bike_rides_cleaned %>%
+  select(month, year,  member_casual,ride_length_hrs,rideable_type) %>%
+  filter(member_casual=="casual") %>%
+  filter(rideable_type == "docked_bike") %>%
+  group_by(month,year)%>%
+  summarise(dock_bike=sum(ride_length_hrs),.groups = 'drop')
+
+#create data frame for casual using classic bikes
+Bar3 <- bike_rides_cleaned %>%
+  select(month, year, member_casual,ride_length_hrs,rideable_type) %>%
+  filter(member_casual=="casual") %>%
+  filter(rideable_type == "electric_bike") %>%
+  group_by(month,year)%>%
+  summarise(electric_bike=sum(ride_length_hrs),.groups = 'drop')
+
+# Join all 3 data frame into one
+barjoined1<- left_join(bar1, bar2, by=c("month"="month","year"="year"))
+barj1<-left_join(barjoined1,Bar3, by=c("month"="month","year"="year"))
+
+#for plotting purpose, change year column to numeric
+barj1$year <-as.numeric(barj1$year)
+
+# To produce a correct bar graph transform data frame wide to long
+barj2<-pivot_longer(barj1, 3:5)
+
+bar_final1<-barj2 %>%
+  #pivot_longer(cols = -month) %>%
+  ggplot(aes(x = month, y = value)) +
+  geom_bar(stat = "identity", 
+           position = "dodge",
+           aes(fill=name))+
+  labs(title = "Casual Members Bike Type Used ", y="Total Bike Ride Length (hr)")+
+  coord_cartesian(ylim = c(0, 75000))+
+  guides(fill=guide_legend("Bike Type"))+
+  facet_wrap(~year)
+
+
 # Member bike ride length and riding frequency throughout the year
 
 #create data frame for members using classic bikes
@@ -711,7 +791,6 @@ bar_final2<-barj2 %>%
   guides(fill=guide_legend("Bike Type"))+
   facet_wrap(~year)
 
-
 # Combine both the member and casual bar graphs into one.
 
 annual_casual_comp <- ggarrange(    #code to combine both graph
@@ -722,15 +801,20 @@ annual_casual_comp <- ggarrange(    #code to combine both graph
   common.legend = FALSE
   #legend = "right"
   )
+print(annual_casual_comp)
+
+# Remove intermediate data frames and variables
+rm(bar1, bar2, Bar3, barjoined1, barj1, barj2, bar1a, bar2a, bar3a, barjoined2)
+gc()  # Optional: calls garbage collector to free up memory
 ```
 
-<!-- Rplot- Bike ride lengh bar graph -->
-<img src="https://i.imgur.com/Q9sZxoF.png" width="800px">
 
 Cyclistic bike use is very popular for casual and  member riders around the “Loop” area of the city of Chicago, a prime business and tourist location.
 
 5.4 Geographic Map 
-```{r geographic_map, eval=FALSE, include=TRUE}
+```{r geographic_map, eval=TRUE, warning=FALSE, include=TRUE}
+
+
 # 5.4 
 # Create a data frame which groups number of trips by station name and includes latitude and longitude coordinates for each station
 map_data_mem <- bike_rides_cleaned %>%
@@ -793,7 +877,7 @@ map_data2 <- rbind(map_data_mem,map_data_mem2)
 groups_all2<- c( "member", "casual")  # this is the text that will be in the legend
 
 # Create a sequence of values which will act as the key shown on the leaflet map to group stations which have a similar number of trips occurring together
-mybins2 <- seq(0, 70000, by = 5000)
+mybins2 <- seq(0, 70000, by = 10000)
 
 
 ## viridis colour palette to visually show how popular a station is 
@@ -856,21 +940,16 @@ foo <-leaflet(map_data2) %>%
     position = "bottomright"
   )%>%
   hideGroup("casual")
+
 ```
-Popular locations for Memeber bike rides:
+Popular locations for both member and casual bike rides:
+``` {r Popular_map, warning=FALSE, include=TRUE ,eval=TRUE}
+foo
+```
+Interactive Map:Toggle between Members and Casual View
 
-<!-- Rplot_Time to Ride-->
-<img src="https://i.imgur.com/zIxjsYk.png" width= "1000px">
-
-
-Popular location for Casual bike Rides:
-
-<!-- Popular bike stations for Casual member-->
-
-<img src="https://i.imgur.com/vXMrhL1.png" width= "1000px">
-
-5.4.1 The Top 100 bike stations 
-```{r eval=FALSE, include=TRUE}
+5.4.1 The Top 100 bike stations for both Member and Casual riders
+```{r Top100, eval=TRUE, warning=FALSE, include=TRUE}
 
 # 5.4.1 The Top 100 bike stations for both casual and member riders
 # Create a data frame which groups number of trips by station name and includes latitude and longitude coordinates for each station
@@ -899,7 +978,7 @@ map_data <- bike_rides_cleaned %>%
 
 
 # Create a sequence of values which will act as the key shown on the leaflet map to group stations which have a similar number of trips occurring together
-mybins <- seq(0, 70000, by = 10000)
+mybins <- seq(0, 100000, by = 5000)
 
 # Assign the viridis colour palette to visually show how popular a station is 
 mypalette <- colorBin(
@@ -965,17 +1044,14 @@ p2<- leaflet(map_data_100) %>%
     title = "Number of trips", 
     position = "bottomright"
   )
-
+p2
 ```
-
-<!--  Top 100 Popular bike stations -->
-<img src= "https://drive.google.com/uc?id=1GK_yDPXD98iiypdIomMevoCY-wiSSa74" width= "1000px ">
 
 
 
 5.4.2 The Top 10 bike stations for both casual and member riders
 
-```{r eval=FALSE, include=TRUE}
+```{r top10, eval=TRUE ,warning=FALSE, include=TRUE}
 #5.4.2 The Top 10 bike stations for both casual and member riders
 map_data_10<- head(map_data_100,10)
 # top 10 stations used in a year:
@@ -1024,11 +1100,14 @@ p3<- leaflet(map_data_10) %>%
     title = "Number of trips", 
     position = "bottomright"
   )
+p3
+
+#  remove the no longer needed data frames
+rm(map_data_mem, map_data_mem2, map_data2, map_data, map_data_100, map_data_10)
+gc()  # Optional: calls garbage collector to free up memory
 
 ```
 
-<!-- Top 10 Popular bike stations -->
-<img src="https://drive.google.com/uc?id=1IlLd6mHCAa7lZUCtOxagXU4-YFEaFbkE" width="1000px">
 
 Casual riders out number member riders around the city center area due to the high tourist attraction and parks, reflecting bike 
 use for leisurely activity. In contrast,  member riders' usage data reflect the act of commuting for work or business 
@@ -1042,7 +1121,7 @@ How could your team and business apply your insights?
 
 What next steps would you or your stakeholders take based on your ﬁndings?
 
-Promotional campaign focused on casual riders. Communicate to casual riders that there could be incentives to becoming from member rider. • 1 month free or discounted price for 12 months subscription * Communicate to casual member who reach a ride length thrush hold that it may be beneficial economically to convert to annual
+Promotional campaign focused on casual riders. Communicate to casual riders that there could be incentives to becoming a member rider. • 1 month free or discounted price for 12 months subscription * Communicate to casual member who reach a ride length thrush hold that it may be beneficial economically to convert to annual
 
 
 
