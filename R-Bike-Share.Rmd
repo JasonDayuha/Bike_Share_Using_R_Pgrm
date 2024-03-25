@@ -313,7 +313,7 @@ bike_rides_cleaned <- bike_rides_cleaned %>%
 
 ```
 
-# 5. Analyses
+# 5. Analysis
 
 
 ```{r stat_summery, eval=TRUE,}
